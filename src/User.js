@@ -9,7 +9,7 @@ const User = ({ user, onCheck, checked }) => {
       <td>
         <input
           type="checkbox"
-          checked={checked}
+          value={checked}
           onClick={() => onCheck(user)}
         />
       </td>

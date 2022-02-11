@@ -1,18 +1,23 @@
 import { useEffect } from "react";
 import { actions } from "./store"
-import { useSelector } from 'react-redux';
-import './App.css';
+import { useSelector } from "react-redux";
+import "./App.css";
 import User from "./User"
 
 
 const App = () => {
 
   const tableData = useSelector(() => actions.get("tableData", {}))
-  const { users = [], search, sort, checkedUsers } = tableData
-
+  const {
+    users = {},
+    search = "",
+    sort = { field: "", order: "" },
+    checkedUsers = {}
+  } = tableData
+  const userList = Object.values(users)
   const headers = ["name", "username"]
 
-  const filteredUsers = users.filter(value => (
+  const filteredUsers = userList.filter(value => (
    value.name.toLowerCase().includes(search.toLowerCase()) ||
    value.username.toLowerCase().includes(search.toLowerCase())
  ))
@@ -26,53 +31,56 @@ const App = () => {
         acc[user.id] = user
         return acc
       }, {})
-      actions.set('state.users', dataObject)
+      actions.set("tableData.users", dataObject)
     }
     fetchData()
-  },[])
-  
+  }, [])
+
   return (
     <div className="App">
       <div className="tables">
         <div className="table">
+          <input
+            className="search"
+            type="search"
+            placeholder="  Type here"
+            onChange={event => actions.set("tableData.search", event.target.value)}
+            value={search}
+          />
           <table>
-            <tr>
-              <input
-                className="search"
-                type="search"
-                placeholder="  Type here"
-                onChange={event => actions.set("searchState.search", event.target.value)}
-              />
-            </tr>
-            <tr> 
-            <th>id</th>
-            {headers.map((header) => (
-              <th key={header}>
-                <button
-                  onClick={() => {
+            <thead>
+              <tr>
+                <th> </th>
+                <th>id</th>
+                {headers.map((header) => (
+                  <th key={header}>
+                    <button
+                      onClick={() => {
                     if (header !== sort.field) {
-                      actions.set("sortState.sort", {field: header, order: "ASC"})
-                    } else if ( sort.order === "ASC") {
-                      actions.set("sortState.sort", {field: header, order: "DSC"})
+                      actions.set("tableData.sort", { field: header, order: "ASC" })
+                    } else if (sort.order === "ASC") {
+                      actions.set("tableData.sort", { field: header, order: "DSC" })
                     } else {
-                      actions.set("sortSteate.sort", {})
+                      actions.set("tableData.sort", {})
                     }
                   }}
-                > 
-                  {header}
-                </button>
-                {header === sort.field &&
-                    <span>
-                      {sort.order === "DSC"
+                    >
+                      {header}
+                    </button>
+                    {header === sort.field &&
+                      <span>
+                        {sort.order === "DSC"
                         ? " 🔽"
                         : " 🔼"
                       }
-                    </span>
+                      </span>
                   }
-              </th>
+                  </th>
             ))}
-            </tr>
-            {filteredUsers
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers
               .sort((a, b) => {
                 const orderModifier = sort.order === "DSC"
                   ? -1
@@ -87,17 +95,24 @@ const App = () => {
                   user={user}
                   checked={checkedUsers[user.id]}
                   onCheck={() => {
-                    actions.set("checkedState.checkedUsers", {...checkedUsers, [user.id]: !checkedUsers[user.id]})
+                    actions.update(`tableData.checkedUsers.${user.id}`,
+                      (a) => !a
+                    )
                   }}
                 />
               ))
             }
+            </tbody>
           </table>
+          <button
+            onClick={() =>
+              actions.set("tableData.users",
+              Object.values(users).filter((_user) => checkedUsers[_user.id] !== true))}
+          >
+            Delete
+          </button>
         </div>
       </div>
-      {/* {Object.values(users).map(({ id, name, username, email }) => (
-        <p onClick={() => actions.set(`state.users.${id}.name`, "Jose")} key={id}> {id} {name} {email} {username} </p>
-      ))} */}
     </div>
   )
 }
