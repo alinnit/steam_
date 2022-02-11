@@ -7,17 +7,10 @@ import User from "./User"
 
 const App = () => {
 
- const { users = {} } = useSelector(() => actions.get("state", {})) 
- const { clonedUsers = {} } = useSelector(() => actions.get("clonedState", {}))
- const { search = "" } = useSelector(() => actions.get("searchState", {}))
- const { clonedSearch = {} } = useSelector(() => actions.get("clonedSearchState", {}))
- const { sort = { field: "", order: "" } } = useSelector(() => actions.get("sortState", {}))
- const { clonedSort = { field: "", order: "" } } = useSelector(() => actions.get("clonedSortState", {}))
- const { checkedUsers = {} } = useSelector(() => actions.get("checkedState", {}))
- const { clonedCheckedUsers = {} } = useSelector(() => actions.get("clonedCheckedState", {}))
+  const tableData = useSelector(() => actions.get("tableData", {}))
+  const { users = [], search, sort, checkedUsers } = tableData
 
- const headers = ["name", "username"]
- const headersTwo = ["name", "username"]
+  const headers = ["name", "username"]
 
   const filteredUsers = users.filter(value => (
    value.name.toLowerCase().includes(search.toLowerCase()) ||
